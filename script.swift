@@ -12,92 +12,113 @@ func functionAsString (inputFunction: String, xValue: Double) -> Double{
     var input = inputFunction
     input = String(input.characters.dropFirst())
     input = String(input.characters.dropLast())
-    
+
     var nomialsAsDoubles: [Double] = []
     var operators: [String] = []
     
     var counter = 0
     var currentNomial = ""
     var operatorsCounter = 0
+    var charCounter = 0
     
     for char in input.characters{
-        switch char {
-        case "(":
-            counter += 1
-        case ")":
-            counter -= 1
-            if counter == 0{
+    	if char == "("{
+    		counter += 1
+    	}
+    	else if char == ")"{
+    		counter -= 1
+    		if counter == 0{
                 nomialsAsDoubles.append(functionAsString(inputFunction: currentNomial + ")", xValue: xValue))
-            }
-        case "x":
-            if currentNomial.characters.count > 0{
-                nomialsAsDoubles.append(Double(currentNomial)!)
                 currentNomial = ""
-                operators.append("*")
+                continue
             }
-            nomialsAsDoubles.append(xValue)
-        case "s":
-            operators.append("sin")
-            operatorsCounter += 1
-        case "c":
-            operators.append("cos")
-            operatorsCounter += 1
-        case "t":
-            operators.append("tan")
-            operatorsCounter += 1
-        default:
-            if Double(String(char)) == nil{
-                operators.append(String(char))
-                if currentNomial.characters.count > 0{
-                    nomialsAsDoubles.append(Double(currentNomial)!)
+    	}
+    	if counter == 0{
+    		switch char {
+	        case "x":
+        		if currentNomial.characters.count > 0{
+	                nomialsAsDoubles.append(Double(currentNomial)!)
+	                currentNomial = ""
+	                operators.append("*")
+	            }
+	            nomialsAsDoubles.append(xValue)
+	        case "s":
+	            operators.append("sin")
+	            operatorsCounter += 1
+	        case "c":
+	            operators.append("cos")
+	            operatorsCounter += 1
+	        case "t":
+	            operators.append("tan")
+	            operatorsCounter += 1
+	        default:
+        		if Double(String(char)) == nil{
+	                operators.append(String(char))
+	                if currentNomial.characters.count > 0{
+	                    nomialsAsDoubles.append(Double(currentNomial)!)
+	                }
+	                currentNomial = ""
+	            }
+	            else{
+	            	currentNomial += String(char)
+	                if charCounter >= input.characters.count - 1{
+	                	nomialsAsDoubles.append(Double(currentNomial)!)
+	                }
+	            }
+        	}
+        }
+	    else{
+	    	currentNomial += String(char)
+	    }
+    	charCounter += 1
+    }
+
+    let allOperators = [["^"],["*", "/"], ["sin", "cos", "tan"], ["+", "-"]]
+    print(nomialsAsDoubles)
+    print(operators)
+
+    for operatorSet in allOperators{
+        var currentIndex = 0
+        while currentIndex <= operators.count - 1{
+            if operatorSet.contains(operators[currentIndex]){
+                switch operators[currentIndex] {
+                case "^":
+                    nomialsAsDoubles[currentIndex] = pow(nomialsAsDoubles[currentIndex], nomialsAsDoubles[currentIndex + 1])
+                    nomialsAsDoubles.remove(at: currentIndex + 1)
+                case "*":
+                    nomialsAsDoubles[currentIndex] = nomialsAsDoubles[currentIndex] * nomialsAsDoubles[currentIndex + 1]
+                    nomialsAsDoubles.remove(at: currentIndex + 1)
+                case "/":
+                    nomialsAsDoubles[currentIndex] = nomialsAsDoubles[currentIndex] / nomialsAsDoubles[currentIndex + 1]
+                    nomialsAsDoubles.remove(at: currentIndex + 1)
+                case "+":
+                    nomialsAsDoubles[currentIndex] = nomialsAsDoubles[currentIndex] + nomialsAsDoubles[currentIndex + 1]
+                    nomialsAsDoubles.remove(at: currentIndex + 1)
+                case "-":
+                    nomialsAsDoubles[currentIndex] = nomialsAsDoubles[currentIndex] - nomialsAsDoubles[currentIndex + 1]
+                    nomialsAsDoubles.remove(at: currentIndex + 1)
+                case "sin":
+					nomialsAsDoubles[currentIndex] = sin(nomialsAsDoubles[currentIndex])
+				case "cos":
+					nomialsAsDoubles[currentIndex] = cos(nomialsAsDoubles[currentIndex])
+				case "tan":
+					nomialsAsDoubles[currentIndex] = tan(nomialsAsDoubles[currentIndex])
+                default:
+                    print("Error ocurred. Unknown operand located. Unexpected answer will result.")
+                    continue
                 }
-                currentNomial = ""
+                operators.remove(at: currentIndex)
             }
             else{
-                currentNomial += String(char)
+                currentIndex += 1
             }
         }
     }
-    
+
     print(input)
     print(nomialsAsDoubles)
-    print(operators)
     print()
-    
-    for singleOperator in ["^","*", "/", "+", "-"]{
-        var currentIndex = 0
-        if operators.contains(singleOperator){
-            while currentIndex <= operators.count - 1{
-                if operators[currentIndex] == singleOperator{
-                    switch singleOperator {
-                    case "^":
-                        nomialsAsDoubles[currentIndex] = pow(nomialsAsDoubles[currentIndex], nomialsAsDoubles[currentIndex + 1])
-                    case "*":
-                        nomialsAsDoubles[currentIndex] = nomialsAsDoubles[currentIndex] * nomialsAsDoubles[currentIndex + 1]
-                    case "/":
-                        nomialsAsDoubles[currentIndex] = nomialsAsDoubles[currentIndex] / nomialsAsDoubles[currentIndex + 1]
-                    case "+":
-                        nomialsAsDoubles[currentIndex] = nomialsAsDoubles[currentIndex] + nomialsAsDoubles[currentIndex + 1]
-                    case "-":
-                        nomialsAsDoubles[currentIndex] = nomialsAsDoubles[currentIndex] - nomialsAsDoubles[currentIndex + 1]
-                    default:
-                        print("Error ocurred. Unknown operand located. Unexpected answer will result.")
-                        continue
-                    }
-                    nomialsAsDoubles.remove(at: currentIndex + 1)
-                    operators.remove(at: currentIndex)
-                }
-                else{
-                    currentIndex += 1
-                }
-            }
-        }
-    }
-    //return Double(nomials[0])!
-    print(nomialsAsDoubles)
-    print(operators)
-    print("Function finished")
-    return 0.0
+    return nomialsAsDoubles[0]
 }
 
 func derivativeOf(testFunction: String, xValue: Double, tolerance: Double) -> Double {
@@ -172,10 +193,10 @@ func zeroNewtonianSearch(beginInterval: Double, testFunction: String, tolerance:
     return zeroNewtonianSearch(beginInterval: newX, testFunction: testFunction, tolerance: tolerance)
 }
 
-print(functionAsString(inputFunction: "((1/2*x+3)^4)", xValue: 2))
-print(functionAsString(inputFunction: "(x^3-3x-5*x)", xValue: 2))
-print(functionAsString(inputFunction: "(x)", xValue: 2))
-print(functionAsString(inputFunction: "(sx)", xValue: 2))
+// print(functionAsString(inputFunction: "((1/2*x+3)^4)", xValue: 2))
+// print(functionAsString(inputFunction: "(x^3-3x-5*x)", xValue: 2))
+// print(functionAsString(inputFunction: "(x)", xValue: 2))
+print(functionAsString(inputFunction: "((s((3x)^(1/2))))^2)", xValue: 2))
 
 //print(zeroBinarySearch(beginInterval: 2, endInterval: 3, testFunction: "(x^3-3x-5)", tolerance: 0.000000000001))
 //
