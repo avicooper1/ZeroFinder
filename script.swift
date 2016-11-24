@@ -19,7 +19,6 @@ func functionAsString (inputFunction: String, xValue: Double) -> Double{
     var counter = 0
     var currentNomial = ""
     var operatorsCounter = 0
-    var charCounter = 0
     
     for char in input.characters{
     	if char == "("{
@@ -61,21 +60,20 @@ func functionAsString (inputFunction: String, xValue: Double) -> Double{
 	            }
 	            else{
 	            	currentNomial += String(char)
-	                if charCounter >= input.characters.count - 1{
-	                	nomialsAsDoubles.append(Double(currentNomial)!)
-	                }
 	            }
         	}
         }
 	    else{
+	    	print(char)
 	    	currentNomial += String(char)
 	    }
-    	charCounter += 1
+    }
+
+    if let lastNomial = Double(currentNomial){
+    	nomialsAsDoubles.append(lastNomial)
     }
 
     let allOperators = [["^"],["*", "/"], ["sin", "cos", "tan"], ["+", "-"]]
-    print(nomialsAsDoubles)
-    print(operators)
 
     for operatorSet in allOperators{
         var currentIndex = 0
@@ -114,10 +112,6 @@ func functionAsString (inputFunction: String, xValue: Double) -> Double{
             }
         }
     }
-
-    print(input)
-    print(nomialsAsDoubles)
-    print()
     return nomialsAsDoubles[0]
 }
 
@@ -140,73 +134,65 @@ func assignNumState (input: Double) -> NumState{
     }
 }
 
-func zeroBinarySearch(beginInterval: Double, endInterval: Double, testFunction: String, tolerance: Double) -> (Double, Bool){
+func zeroBinarySearch(beginInterval: Double, endInterval: Double, testFunction: String, tolerance: Double, iteration: Int) -> (Double, Bool, Int){
     
     let beginIntervalState = assignNumState(input: functionAsString(inputFunction: testFunction, xValue: beginInterval))
     let endIntervalState = assignNumState(input: functionAsString(inputFunction: testFunction, xValue: endInterval))
     
     
     if beginIntervalState == .none || endIntervalState == .none{
-        return (0, false)
+        return (0, false, iteration + 1)
     }
     
     if beginIntervalState == .zero{
-        return (beginInterval, true)
+        return (beginInterval, true, iteration + 1)
     }
     else if endIntervalState == .zero{
-        return (endInterval, true)
+        return (endInterval, true, iteration + 1)
     }
     
     if beginIntervalState == endIntervalState{
-        return (0, false)
+        return (0, false, iteration + 1)
     }
     
     let mid = (beginInterval + endInterval) / 2
     if abs(functionAsString(inputFunction: testFunction, xValue: mid)) < tolerance{
-        return (mid, true)
+        return (mid, true, iteration + 1)
     }
     
     let midIntervalState = assignNumState(input: functionAsString(inputFunction: testFunction, xValue: mid))
     if midIntervalState != beginIntervalState{
-        return zeroBinarySearch(beginInterval: beginInterval, endInterval: mid, testFunction: testFunction, tolerance: tolerance)
+        return zeroBinarySearch(beginInterval: beginInterval, endInterval: mid, testFunction: testFunction, tolerance: tolerance, iteration: iteration + 1)
     }
     else if midIntervalState != endIntervalState{
-        return zeroBinarySearch(beginInterval: mid, endInterval: endInterval, testFunction: testFunction, tolerance: tolerance)
+        return zeroBinarySearch(beginInterval: mid, endInterval: endInterval, testFunction: testFunction, tolerance: tolerance, iteration: iteration + 1)
     }
     
     
-    return (0, false)
+    return (0, false, iteration + 1)
 }
 
-func zeroNewtonianSearch(beginInterval: Double, testFunction: String, tolerance: Double) -> (Double, Bool){
+func zeroNewtonianSearch(beginInterval: Double, testFunction: String, tolerance: Double, iteration: Int) -> (Double, Bool, Int){
     let functionValue = functionAsString(inputFunction: testFunction, xValue: beginInterval)
     let derivativeValue = derivativeOf(testFunction: testFunction, xValue: beginInterval, tolerance: tolerance)
     let newX = beginInterval - (functionValue / derivativeValue)
-    print(newX)
     if abs(functionAsString(inputFunction: testFunction, xValue: newX)) < tolerance{
-        return(newX, true)
+        return(newX, true, iteration + 1)
     }
     else if newX.isNaN{
-        return (0, false)
+    	print("Current newX resolved in NaN")
+        return (0, false, iteration + 1)
     }
     
-    return zeroNewtonianSearch(beginInterval: newX, testFunction: testFunction, tolerance: tolerance)
+    return zeroNewtonianSearch(beginInterval: newX, testFunction: testFunction, tolerance: tolerance, iteration: iteration + 1)
 }
 
-// print(functionAsString(inputFunction: "((1/2*x+3)^4)", xValue: 2))
-// print(functionAsString(inputFunction: "(x^3-3x-5*x)", xValue: 2))
-// print(functionAsString(inputFunction: "(x)", xValue: 2))
-print(functionAsString(inputFunction: "((s((3x)^(1/2))))^2)", xValue: 2))
-
-//print(zeroBinarySearch(beginInterval: 2, endInterval: 3, testFunction: "(x^3-3x-5)", tolerance: 0.000000000001))
-//
-//print()
-//print()
-//print()
-//
-//let a = derivativeOf(testFunction: "(x^2+2)", xValue: 2, tolerance: 0.000001)
-//print(a)
-//print(zeroNewtonianSearch(beginInterval: 2, testFunction: "(x^2+2)", tolerance: 0.00000000000001))
-//print(zeroNewtonianSearch(beginInterval: 2, testFunction: "(x^2)", tolerance: 0.00000000000001))
-
-//print(zeroNewtonianSearch(beginInterval: -3, testFunction: "(x^3-3x)", tolerance: 0.0000001))
+for x in 2...100{
+	let currentComputable = "x^\(x)-1"
+	print(currentComputable)
+	print("zeroBinarySearch: ", terminator:"")
+	print(zeroBinarySearch(beginInterval: -10, endInterval: 0, testFunction: currentComputable, tolerance: 0.000000001, iteration: 0))
+	print("zeroNewtonianSearch: ", terminator: "")
+	print(zeroNewtonianSearch(beginInterval: -10, testFunction: currentComputable, tolerance: 0.00000000001, iteration: 0))
+	print()
+}
