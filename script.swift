@@ -143,16 +143,14 @@ func zeroBinarySearch(beginInterval: Double, endInterval: Double, testFunction: 
     if beginIntervalState == .none || endIntervalState == .none{
         return (0, false, iteration + 1)
     }
-    
-    if beginIntervalState == .zero{
+    else if beginIntervalState == endIntervalState{
+        return (0, false, iteration + 1)
+    }
+    else if beginIntervalState == .zero{
         return (beginInterval, true, iteration + 1)
     }
     else if endIntervalState == .zero{
         return (endInterval, true, iteration + 1)
-    }
-    
-    if beginIntervalState == endIntervalState{
-        return (0, false, iteration + 1)
     }
     
     let mid = (beginInterval + endInterval) / 2
@@ -173,9 +171,7 @@ func zeroBinarySearch(beginInterval: Double, endInterval: Double, testFunction: 
 }
 
 func zeroNewtonianSearch(beginInterval: Double, testFunction: String, tolerance: Double, iteration: Int) -> (Double, Bool, Int){
-    let functionValue = functionAsString(inputFunction: testFunction, xValue: beginInterval)
-    let derivativeValue = derivativeOf(testFunction: testFunction, xValue: beginInterval, tolerance: tolerance)
-    let newX = beginInterval - (functionValue / derivativeValue)
+    let newX = beginInterval - (functionAsString(inputFunction: testFunction, xValue: beginInterval) / derivativeOf(testFunction: testFunction, xValue: beginInterval, tolerance: tolerance))
     if abs(functionAsString(inputFunction: testFunction, xValue: newX)) < tolerance{
         return(newX, true, iteration + 1)
     }
@@ -187,12 +183,33 @@ func zeroNewtonianSearch(beginInterval: Double, testFunction: String, tolerance:
     return zeroNewtonianSearch(beginInterval: newX, testFunction: testFunction, tolerance: tolerance, iteration: iteration + 1)
 }
 
-for x in 2...100{
-	let currentComputable = "x^\(x)-1"
-	print(currentComputable)
-	print("zeroBinarySearch: ", terminator:"")
-	print(zeroBinarySearch(beginInterval: -10, endInterval: 0, testFunction: currentComputable, tolerance: 0.000000001, iteration: 0))
-	print("zeroNewtonianSearch: ", terminator: "")
-	print(zeroNewtonianSearch(beginInterval: -10, testFunction: currentComputable, tolerance: 0.00000000001, iteration: 0))
-	print()
+func printFormattedResults(currentX: Int, input: (Double, Bool, Int)){
+	if input.1{
+		print(String(input.0) + "\t" + String(input.2))
+	}
+	else{
+		print("Result is false")
+	}
 }
+
+print("Experiment 1: Binary search x^y as y gets arbitrarily larger")
+for x in 0...100{
+	if x % 2 == 0{
+		printFormattedResults(currentX: x, input: zeroBinarySearch(beginInterval: -10, endInterval: 0, testFunction: "(x^\(x)-1)", tolerance: 0.000000001, iteration: 0))
+	}
+}
+print()
+
+print("Experiment 2: Newton search x^y as y gets arbitrarily larger")
+for x in 0...100{
+	if x % 2 == 0{
+		printFormattedResults(currentX: x, input: zeroNewtonianSearch(beginInterval: -10, testFunction: "(x^\(x)-1)", tolerance: 0.000000001, iteration: 0))
+	}
+}
+print()
+
+print("Experiment 3: Binary search as begin interval get arbitrarily smaller than the root")
+for x in 0...100{
+	printFormattedResults(currentX: x, input: zeroBinarySearch(beginInterval: (-10-Double(x)), endInterval: 0, testFunction: "(x^10-1)", tolerance: 0.000000001, iteration: 0))
+}
+print()
