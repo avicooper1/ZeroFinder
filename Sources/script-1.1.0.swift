@@ -203,7 +203,7 @@ func getPolynomialHighestPower(inputFunction: String, xValue: Double) -> Int{
 }
 
 func combinedAlgorithms(beginInterval: Double, endInterval: Double, testFunction: String, tolerance: Double, iteration: Int) -> (Double, Bool, Int){
-    if getPolynomialHighestPower(inputFunction: testFunction, xValue: 2) > 11{
+    if getPolynomialHighestPower(inputFunction: testFunction, xValue: 2) > 13{
         return zeroBinarySearch(beginInterval: beginInterval, endInterval: endInterval, testFunction: testFunction, tolerance: tolerance, iteration: iteration)
     }
     else{
