@@ -51,7 +51,7 @@ func functionAsString (inputFunction: String, xValue: Double) -> Double{
 	            operators.append("tan")
 	            operatorsCounter += 1
 	        default:
-        		if Double(String(char)) == nil{
+        		if Double(String(char)) == nil && char != "."{
 	                operators.append(String(char))
 	                if currentNomial.characters.count > 0{
 	                    nomialsAsDoubles.append(Double(currentNomial)!)
@@ -64,7 +64,6 @@ func functionAsString (inputFunction: String, xValue: Double) -> Double{
         	}
         }
 	    else{
-	    	print(char)
 	    	currentNomial += String(char)
 	    }
     }
@@ -74,7 +73,7 @@ func functionAsString (inputFunction: String, xValue: Double) -> Double{
     }
 
     let allOperators = [["^"],["*", "/"], ["sin", "cos", "tan"], ["+", "-"]]
-
+    
     for operatorSet in allOperators{
         var currentIndex = 0
         while currentIndex <= operators.count - 1{
@@ -139,6 +138,8 @@ func zeroBinarySearch(beginInterval: Double, endInterval: Double, testFunction: 
     let beginIntervalState = assignNumState(input: functionAsString(inputFunction: testFunction, xValue: beginInterval))
     let endIntervalState = assignNumState(input: functionAsString(inputFunction: testFunction, xValue: endInterval))
     
+    print(beginIntervalState)
+    print(endIntervalState)
     
     if beginIntervalState == .none || endIntervalState == .none{
         return (0, false, iteration + 1)
@@ -172,6 +173,9 @@ func zeroBinarySearch(beginInterval: Double, endInterval: Double, testFunction: 
 
 func zeroNewtonianSearch(beginInterval: Double, testFunction: String, tolerance: Double, iteration: Int) -> (Double, Bool, Int){
     let newX = beginInterval - (functionAsString(inputFunction: testFunction, xValue: beginInterval) / derivativeOf(testFunction: testFunction, xValue: beginInterval, tolerance: tolerance))
+    print(newX)
+    print("Distance from x axis is:" + String(abs(functionAsString(inputFunction: testFunction, xValue: newX))))
+    print()
     if abs(functionAsString(inputFunction: testFunction, xValue: newX)) < tolerance{
         return(newX, true, iteration + 1)
     }
